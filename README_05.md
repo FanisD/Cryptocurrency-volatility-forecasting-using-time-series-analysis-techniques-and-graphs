@@ -1,33 +1,45 @@
-# 05_Adaptive_STGNN_and_Robustness.ipynb
+---
 
-## Περιγραφή
-Αυτό το Jupyter Notebook αποτελεί το τελικό και πιο προηγμένο στάδιο της πτυχιακής εργασίας (**Μήνας 5**). Σκοπός του είναι η επίλυση του προβλήματος της "υπερ-εξομάλυνσης" (**oversmoothing**) που παρατηρήθηκε κατά τη χρήση στατικών γράφων.
+## English
 
-Για τον σκοπό αυτό, υλοποιείται ένα **Adaptive Spatio-Temporal Graph Neural Network (Adaptive ST-GNN)**, εμπνευσμένο από State-of-the-Art αρχιτεκτονικές όπως το *Graph WaveNet* και το *MTGNN*. Το μοντέλο μαθαίνει δυναμικά (**end-to-end**) την τοπολογία της αγοράς και ανακαλύπτει αυτόνομα τις κρυφές διασταυρούμενες συσχετίσεις μεταξύ των κρυπτονομισμάτων.
+### Description
+This Jupyter Notebook is the final and most advanced stage of the thesis (**Month 5**). It addresses the **oversmoothing** problem observed with static graphs.
 
-## Βασικοί Μηχανισμοί & Καινοτομίες
+An **Adaptive Spatio-Temporal Graph Neural Network (Adaptive ST-GNN)** is implemented, inspired by architectures such as *Graph WaveNet* and *MTGNN*. The model learns market topology **end-to-end** and autonomously discovers hidden cross-asset correlations.
 
-* **Δυναμική Εκμάθηση Γράφου (Adaptive Graph Learning):** Αντί για τη χρήση προκαθορισμένων πινάκων γειτνίασης (π.χ. Pearson ή VAR), το μοντέλο δημιουργεί **Node Embeddings** για κάθε νόμισμα. Μέσω του πολλαπλασιασμού αυτών των embeddings και της χρήσης μη-γραμμικών συναρτήσεων (ReLU, Softmax), παράγεται δυναμικά ο **Προσαρμοστικός Πίνακας Γειτνίασης**.
-* **Οπτικοποίηση (Heatmap):** Ο μαθημένος πίνακας γειτνίασης εξάγεται και οπτικοποιείται μέσω θερμικού διαγράμματος, αποκαλύπτοντας την πραγματική δομή μετάδοσης κινδύνου που "αντιλήφθηκε" το νευρωνικό δίκτυο κατά την εκπαίδευση.
+### Architecture
+The Adaptive ST-GNN combines three components:
 
-## Έλεγχοι Ανθεκτικότητας (Robustness Checks)
-Πραγματοποιείται η δοκιμή **Frozen Inference** για να επιβεβαιωθεί ότι το μοντέλο διαθέτει ικανότητα γενίκευσης και δεν έχει υποστεί υπερπροσαρμογή (**overfitting**):
-1.  Τα βάρη του εκπαιδευμένου μοντέλου (από το Yahoo Finance) "κλειδώνονται".
-2.  Το μοντέλο αξιολογείται απευθείας σε νέα datasets από το **Binance** και το **Coinbase**.
-3.  Ελέγχεται η συμπεριφορά του μοντέλου σε συνθήκες ελλιπών δεδομένων (π.χ. NaNs στο νόμισμα BNB του Coinbase).
+1. **TCN (Temporal Convolution):** Extracts temporal patterns (Conv2d over Time × Nodes).
+2. **Adaptive Graph Convolution:** **Node Embeddings** per coin → dynamic adjacency matrix (ReLU + Softmax).
+3. **GRU:** Fuses spatio-temporal information for final prediction.
 
-## Στατιστική Αξιολόγηση (Diebold-Mariano Test)
-Για την επιστημονική τεκμηρίωση της υπεροχής του Adaptive ST-GNN έναντι των baselines (GARCH, LSTM), εκτελείται ο στατιστικός έλεγχος **Diebold-Mariano (DM Test)**. 
-* **Στόχος:** Η επιβεβαίωση ότι η βελτίωση στις μετρικές (ειδικά στο σφάλμα **QLIKE**) είναι στατιστικά σημαντική (**p-value < 0.05**) και όχι τυχαία.
+**Target:** Multivariate absolute log-return forecasting for 10 coins, **14-day** sliding window, **80% / 20%** split. Missing values are filled with `fillna(0)`.
 
-## Απαιτούμενες Βιβλιοθήκες (Dependencies)
-Για την εκτέλεση του Notebook απαιτούνται οι εξής βιβλιοθήκες:
+### Visualization
+The learned adjacency matrix is exported and visualized as a **heatmap** (seaborn), revealing the risk-transmission structure learned during training.
 
-* `torch`, `torch.nn` (Αρχιτεκτονική Νευρωνικών Δικτύων)
-* `seaborn`, `matplotlib` (Οπτικοποίηση Heatmaps)
-* `scipy.stats` (Στατιστικοί έλεγχοι DM Test)
-* `pandas`, `numpy`, `scikit-learn` (Διαχείριση δεδομένων)
+### Robustness Checks
+**Frozen Inference** validates generalization:
 
-**Εγκατάσταση:**
+1. Weights (trained on Yahoo Finance) are frozen.
+2. The model is evaluated on **Binance** and **Coinbase** without retraining.
+3. Behavior under missing data is tested (NaNs in the Coinbase dataset).
+
+### Statistical Evaluation (Diebold-Mariano Test)
+The **Diebold-Mariano (DM Test)** confirms statistical significance:
+
+* **Comparison:** Adaptive ST-GNN vs **Naive Persistence Baseline** (tomorrow's volatility = today's).
+* **Loss function:** Squared error (RMSE-based differential).
+* **Result:** p-value < 0.05 → statistically significant improvement.
+
+### Dependencies
+* `torch`, `torch.nn` — Neural network architecture
+* `seaborn`, `matplotlib` — Heatmaps
+* `scipy.stats` — Diebold-Mariano test
+* `pandas`, `numpy`, `scikit-learn` — Data management
+
+**Installation:**
 ```bash
 pip install torch seaborn scipy scikit-learn pandas numpy matplotlib
+```

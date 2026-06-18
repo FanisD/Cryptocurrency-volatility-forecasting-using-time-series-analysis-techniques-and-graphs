@@ -1,49 +1,52 @@
-# 01_Data_Collection_and_EDA.ipynb
+---
 
-## Περιγραφή
-Αυτό το Jupyter Notebook αποτελεί το πρώτο και θεμελιώδες στάδιο της πτυχιακής εργασίας (**Μήνας 1**). Είναι υπεύθυνο για την αυτοματοποιημένη άντληση, τον καθαρισμό και την προεπεξεργασία των ιστορικών δεδομένων (daily close prices) για 10 κορυφαία κρυπτονομίσματα, τα οποία θα αποτελέσουν τους κόμβους (**nodes**) στα Χωροχρονικά Νευρωνικά Δίκτυα Γράφων (ST-GNNs).
+## English
 
-## Πηγές Δεδομένων (APIs)
-Το notebook αντλεί δεδομένα από τρεις (3) διαφορετικές πηγές, προκειμένου να εξασφαλιστεί η αξιοπιστία των μοντέλων και να καταστούν δυνατοί οι μετέπειτα έλεγχοι ανθεκτικότητας (Robustness Checks):
+### Description
+This Jupyter Notebook is the first foundational stage of the thesis (**Month 1**). It handles automated data collection, cleaning, and preprocessing of historical daily close prices for 10 major cryptocurrencies, which serve as **nodes** in the subsequent Spatio-Temporal Graph Neural Networks (ST-GNNs).
 
-* **Yahoo Finance:** Αποτελεί το κύριο (**baseline**) dataset της έρευνας, προσφέροντας το μεγαλύτερο ιστορικό βάθος (~2.986 ημέρες).
-* **Binance API:** Χρησιμοποιείται ως εναλλακτική πηγή για τα τελευταία χρόνια (περίπου 1.000 ημέρες).
-* **Coinbase API:** Χρησιμοποιείται ως πηγή ελέγχου ανθεκτικότητας (τελευταίες 350 ημέρες), περιέχοντας σκόπιμα ελλιπή δεδομένα (**NaNs**) για το νόμισμα BNB, προκειμένου να ελεγχθεί η ικανότητα γενίκευσης του τελικού μοντέλου στο Στάδιο 5.
+### Data Sources (APIs)
+The notebook pulls data from three sources to ensure model reliability and enable later robustness checks:
 
-## Επιλεγμένα Κρυπτονομίσματα
-Τα 10 κρυπτονομίσματα που εξετάζονται (και θα διαμορφώσουν τον γράφο των συσχετίσεων) είναι:
+* **Yahoo Finance** (`yfinance`): Main **baseline** dataset, history from `2018-01-01` (~2,986 log-return days).
+* **Binance API:** Alternative source for the most recent ~1,000 daily candles (~999 log-returns).
+* **Coinbase API:** Robustness-check source (~349 log-returns), with intentionally incomplete data for some coins (see below).
 
-* **BTC-USD** (Bitcoin)
-* **ETH-USD** (Ethereum)
-* **XRP-USD** (Ripple)
-* **LTC-USD** (Litecoin)
-* **ADA-USD** (Cardano)
-* **BNB-USD** (Binance Coin)
-* **SOL-USD** (Solana)
-* **DOGE-USD** (Dogecoin)
-* **TRX-USD** (Tron)
-* **LINK-USD** (Chainlink)
+### Selected Cryptocurrencies
+The 10 cryptocurrencies examined (forming the correlation graph nodes) are:
 
-## Βήματα Προεπεξεργασίας (EDA & Preprocessing)
-* **Λήψη Δεδομένων:** Κλήση των αντίστοιχων APIs και εξαγωγή των ημερήσιων τιμών κλεισίματος (**Close Prices**).
-* **Συγχώνευση (Merging):** Δημιουργία ενός ενιαίου DataFrame ανά πηγή, με προσεκτική ευθυγράμμιση των ημερομηνιών.
-* **Καθαρισμός (Data Cleaning):** Χειρισμός ελλιπών τιμών (Missing Values) μέσω της μεθόδου **Forward Fill (`ffill`)**, ώστε να αποφευχθεί η διαρροή μελλοντικής πληροφορίας (data leakage). Εξαίρεση αποτελεί το dataset του Coinbase, όπου τα NaNs του BNB διατηρούνται σκόπιμα για τον έλεγχο ανθεκτικότητας.
-* **Υπολογισμός Αποδόσεων:** Μετατροπή των απόλυτων τιμών σε ημερήσιες λογαριθμικές αποδόσεις (**Log-Returns**), οι οποίες αποτελούν τη στάνταρ πρακτική στη χρηματοοικονομική και οικονομετρική μοντελοποίηση.
+* **BTC-USD** (Bitcoin) · **ETH-USD** (Ethereum) · **XRP-USD** (Ripple)
+* **LTC-USD** (Litecoin) · **ADA-USD** (Cardano) · **BNB-USD** (Binance Coin)
+* **SOL-USD** (Solana) · **DOGE-USD** (Dogecoin) · **TRX-USD** (Tron) · **LINK-USD** (Chainlink)
 
-## Εξαγόμενα Αρχεία (Outputs)
-Η εκτέλεση του notebook παράγει τρία (3) αρχεία CSV στον τοπικό δίσκο, τα οποία τροφοδοτούν άμεσα τα επόμενα στάδια (Μήνας 2 έως 5):
+### Preprocessing Steps
+* **Data Retrieval:** API calls to fetch daily close prices.
+* **Merging:** Unified DataFrame per source with aligned dates and common column naming (Yahoo format).
+* **Data Cleaning:** Missing values handled via **forward fill (`ffill`)** for Yahoo and Binance to avoid data leakage. On Coinbase, NaNs are preserved where the source provides no data.
+* **Return Computation:** Conversion to daily **log-returns** using `ln(P_t / P_{t-1})`.
 
-1. `yahoo_log_returns.csv`: Το κύριο dataset (2.986 γραμμές × 10 στήλες).
-2. `binance_log_returns.csv`: Το dataset από το Binance (1.000 γραμμές × 10 στήλες).
-3. `coinbase_log_returns.csv`: Το dataset από το Coinbase (350 γραμμές × 10 στήλες).
+### Missing Data by Source
+| Source | Coin | Status |
+|---|---|---|
+| Yahoo Finance | SOL-USD | ~830 NaNs (late listing) |
+| Coinbase | TRX-USD | Fully missing (349 NaNs) |
+| Coinbase | BNB-USD | Partially missing (~214 NaNs) |
 
-## Απαιτούμενες Βιβλιοθήκες (Dependencies)
-Για την εκτέλεση του notebook και την επικοινωνία με τα APIs, απαιτούνται τα ακόλουθα πακέτα της Python:
+Later notebooks handle these gaps with `fillna(0)` where required.
 
-* `pandas`, `numpy` (Διαχείριση δεδομένων και υπολογισμοί)
-* `yfinance` (Άντληση δεδομένων από Yahoo Finance)
-* `requests` (Κλήσεις REST API για Binance/Coinbase)
+### Output Files
+Running the notebook produces three CSV files:
 
-**Εγκατάσταση:**
+1. `crypto_log_returns_yahoo.csv` — main dataset (2,986 rows × 10 columns)
+2. `crypto_log_returns_binance.csv` — Binance (999 rows × 10 columns)
+3. `crypto_log_returns_coinbase.csv` — Coinbase (349 rows × 10 columns)
+
+### Dependencies
+* `pandas`, `numpy` — Data management and computation
+* `yfinance` — Yahoo Finance data retrieval
+* `requests` — REST API calls for Binance/Coinbase
+
+**Installation:**
 ```bash
 pip install pandas numpy yfinance requests
+```

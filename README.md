@@ -1,39 +1,46 @@
-# Πρόγνωση διακύμανσης κρυπτονομισμάτων με χρήση τεχνικών ανάλυσης χρονοσειρών και γράφων
-### Cryptocurrency volatility forecasting using time series analysis techniques and graphs
+---
 
-## Σχετικά με την Πτυχιακή Εργασία
-Η παρούσα πτυχιακή εργασία ερευνά την πρόβλεψη της μεταβλητότητας (**volatility forecasting**) στην αγορά των κρυπτονομισμάτων. Δεδομένης της ακραίας αστάθειας και της αδιάλειπτης (24/7) λειτουργίας της συγκεκριμένης αγοράς, τα παραδοσιακά μονομεταβλητά μοντέλα δυσκολεύονται να εκτιμήσουν σωστά τον κίνδυνο, καθώς αγνοούν τις αλληλεξαρτήσεις και τα "σοκ" (**spillovers**) μεταξύ των διαφορετικών νομισμάτων.
+## English
 
-Η έρευνα προτείνει τη μετάβαση σε **Χωροχρονικά Νευρωνικά Δίκτυα Γράφων (ST-GNNs)**, συγκρίνοντας μια σειρά από Baseline (Οικονομετρικά & Deep Learning) μοντέλα με προηγμένους αλγορίθμους **Δυναμικής Εκμάθησης Γράφων (Adaptive Graph Learning)**, με στόχο την ακριβέστερη διαχείριση χρηματοοικονομικού κινδύνου.
+### About the Thesis
+This B.Sc. thesis investigates **volatility forecasting** in cryptocurrency markets. Given the extreme instability and 24/7 operation of this market, traditional univariate models struggle to estimate risk correctly because they ignore cross-asset dependencies and volatility **spillovers**.
 
-## Ερευνητικοί Στόχοι
-* **Συστηματική Αξιολόγηση:** Σύγκριση παραδοσιακών στατιστικών μοντέλων (`GARCH`) με σύγχρονες αρχιτεκτονικές Deep Learning (`LSTM`, `GRU`, `TCN`, `Transformers`).
-* **Δίκτυα Γράφων:** Μοντελοποίηση της αγοράς ως δίκτυο (γράφημα), όπου οι συσχετίσεις λειτουργούν ως "ακμές" (**edges**) και τα νομίσματα ως "κόμβοι" (**nodes**).
-* **Adaptive ST-GNNs:** Αντιμετώπιση του φαινομένου της "υπερ-εξομάλυνσης" (**oversmoothing**) μέσω δικτύων που μαθαίνουν αυτόνομα τις κρυφές δομικές σχέσεις της αγοράς (**end-to-end**), χωρίς τη χρήση στατικών πινάκων.
-* **Έλεγχος Ανθεκτικότητας:** Επιβεβαίωση της γενίκευσης του μοντέλου σε πολλαπλές πηγές δεδομένων (Yahoo Finance, Binance, Coinbase).
+The research proposes a shift toward **Spatio-Temporal Graph Neural Networks (ST-GNNs)**, comparing a range of baseline (econometric and deep learning) models against advanced **Adaptive Graph Learning** algorithms, with the goal of more accurate financial risk management.
 
-## Τεχνολογίες & Βιβλιοθήκες
-Το project αναπτύχθηκε αποκλειστικά σε **Python 3** και στηρίζεται στο ακόλουθο τεχνολογικό οικοσύστημα:
+### Research Objectives
+* **Systematic Evaluation:** Compare traditional statistical models (`GARCH`) with modern deep learning architectures (`LSTM`, `GRU`, `TCN`, `Transformers`).
+* **Graph Networks:** Model the market as a network (graph), where correlations act as **edges** and coins as **nodes**.
+* **Adaptive ST-GNNs:** Address **oversmoothing** through networks that learn hidden market structure **end-to-end**, without static adjacency matrices.
+* **Robustness Checks:** Validate generalization across multiple data sources (Yahoo Finance, Binance, Coinbase).
+
+### Technologies & Libraries
+The project was developed entirely in **Python 3** using:
 
 * **Deep Learning & GNNs:** `PyTorch`, `PyTorch Geometric`
-* **Οικονομετρία & Στατιστική:** `statsmodels` (VAR, ADF), `arch` (GARCH(1,1)), `scipy` (Diebold-Mariano Test)
-* **Διαχείριση & Οπτικοποίηση:** `pandas`, `numpy`, `networkx`, `matplotlib`, `seaborn`
-* **Data Engineering:** Εξαγωγή δεδομένων μέσω API (Yahoo Finance / Binance / Coinbase).
+* **Econometrics & Statistics:** `statsmodels` (VAR, ADF), `arch` (GARCH(1,1)), `scipy` (Diebold-Mariano Test)
+* **Data Management & Visualization:** `pandas`, `numpy`, `networkx`, `matplotlib`, `seaborn`
+* **Data Engineering:** API-based data extraction (`yfinance`, Yahoo Finance / Binance / Coinbase).
 
-## Δομή Αποθετηρίου (Repository Structure)
-Ο κώδικας είναι οργανωμένος σε 5 διακριτά στάδια (**Jupyter Notebooks**) που ακολουθούν τη λογική ροή της έρευνας:
+### Repository Structure
+The code is organized into 5 sequential **Jupyter Notebooks**. Each notebook has its own README:
 
-1.  **`01_Data_Collection_and_EDA.ipynb`**: Αυτοματοποιημένη άντληση, καθαρισμός (forward-fill) και υπολογισμός των Log-Returns για 10 νομίσματα.
-2.  **`02_Baseline_Models_GARCH.ipynb`**: Υλοποίηση του παραδοσιακού μοντέλου GARCH(1,1) (έλεγχος στασιμότητας, πρόβλεψη μεταβλητότητας).
-3.  **`03_Deep_Learning_Baselines.ipynb`**: Εκπαίδευση μονομεταβλητών νευρωνικών δικτύων (LSTM/GRU) μέσω κυλιόμενων παραθύρων (sliding windows).
-4.  **`04_Static_Graph_Construction_GNNs.ipynb`**: Δημιουργία στατικών γράφων (Pearson Correlation & VAR Spillovers) και υλοποίηση υβριδικών ST-GNNs (GCN+LSTM, GAT+GRU).
-5.  **`05_Adaptive_STGNN_and_Robustness.ipynb`**: Ανάπτυξη του Προσαρμοστικού Γράφου, στατιστικός έλεγχος Diebold-Mariano και εκτέλεση σεναρίων Robustness (Frozen Inference).
+| Notebook | README | Description |
+|---|---|---|
+| `01_Data_Collection_and_EDA.ipynb` | [README_01.md](README_01.md) | Data collection, cleaning, and log-return computation for 10 coins |
+| `02_Baseline_Models_GARCH.ipynb` | [README_02.md](README_02.md) | Traditional GARCH(1,1) econometric baseline |
+| `03_Deep_Learning_Baselines.ipynb` | [README_03.md](README_03.md) | Univariate DL models (LSTM, GRU, TCN, Transformer) |
+| `04_Static_Graph_Construction_GNNs.ipynb` | [README_04.md](README_04.md) | Static graphs (Pearson & VAR) and hybrid ST-GNNs |
+| `05_Adaptive_STGNN_and_Robustness.ipynb` | [README_05.md](README_05.md) | Adaptive ST-GNN, Diebold-Mariano test, and robustness checks |
 
-## Βασικά Συμπεράσματα (Key Findings)
-* Τα μοντέλα **Deep Learning (LSTM/GRU)** μείωσαν το μέσο σφάλμα (RMSE), αλλά "τιμωρήθηκαν" (μετρική QLIKE) κατά τα ξαφνικά χρηματιστηριακά κραχ, λόγω της καθυστερημένης προσαρμογής τους.
-* Το **Παραδοσιακό GARCH** διατήρησε την ικανότητα να αναγνωρίζει τον κίνδυνο, αλλά απέτυχε στις πολυβηματικές προβλέψεις λόγω της Επιστροφής στον Μέσο (**Mean Reversion**).
-* Το **Adaptive ST-GNN** κυριάρχησε απόλυτα (**p-value < 0.05**). Ο αλγόριθμος ανακάλυψε μόνος του την κρυφή τοπολογία μετάδοσης του κινδύνου, επιδεικνύοντας ταυτόχρονα εξαιρετική ανθεκτικότητα σε νέα δεδομένα, ακόμη και με την παρουσία ελλιπών παρατηρήσεων (Missing Values).
+**Data files (outputs of Notebook 01):**
+* `crypto_log_returns_yahoo.csv` — main dataset (~2,986 days × 10 coins)
+* `crypto_log_returns_binance.csv` — Binance (~999 days × 10 coins)
+* `crypto_log_returns_coinbase.csv` — Coinbase (~349 days × 10 coins)
 
----
-**Πλαίσιο Υλοποίησης**
-Η συγκεκριμένη έρευνα έγινε στο πλαίσιο Πτυχιακής Εργασίας (B.Sc. Thesis) στο **Χαροκόπειο Πανεπιστήμιο**.
+### Key Findings
+* **Deep Learning models (LSTM/GRU)** reduced average error (RMSE) but were penalized by the QLIKE metric during sudden market crashes due to delayed adaptation.
+* **Traditional GARCH** retained strong risk-awareness but failed at multivariate forecasting because of **mean reversion**.
+* The **Adaptive ST-GNN** outperformed the naive persistence baseline with **p-value < 0.05** in the Diebold-Mariano test. It autonomously discovered hidden risk-transmission topology and showed strong robustness on new data, even with missing observations.
+
+**Implementation Context**
+This research was conducted as a B.Sc. Thesis at **Harokopio University**.

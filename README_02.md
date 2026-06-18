@@ -1,34 +1,36 @@
-# 02_Baseline_Models_GARCH.ipynb
+---
 
-## Περιγραφή
-Αυτό το Jupyter Notebook αποτελεί το δεύτερο στάδιο της έρευνας (**Μήνας 2**) και εστιάζει στη μονομεταβλητή (univariate) ανάλυση χρονοσειρών. Κύριος σκοπός του είναι η υλοποίηση του παραδοσιακού οικονομετρικού μοντέλου **GARCH(1,1)**, το οποίο λειτουργεί ως το βασικό μοντέλο αναφοράς (**Baseline**) για την αξιολόγηση της μεταβλητότητας (volatility).
+## English
 
-Μέσω αυτού του notebook αποδεικνύεται η ικανότητα των παραδοσιακών μοντέλων να συλλαμβάνουν την "ομαδοποίηση της μεταβλητότητας" (**volatility clustering**), αλλά και η αδυναμία τους σε πολυβηματικές προβλέψεις λόγω του φαινομένου της επιστροφής στον μέσο (**mean reversion**).
+### Description
+This Jupyter Notebook is the second stage of the research (**Month 2**) and focuses on **univariate** time series analysis. Its main purpose is implementing the traditional econometric **GARCH(1,1)** model as the reference **baseline** for volatility evaluation.
 
-## Δεδομένα Εισόδου (Input Data)
-Το notebook τροφοδοτείται από τα δεδομένα που εξήχθησαν στο προηγούμενο στάδιο:
-* `crypto_log_returns_yahoo.csv`: Το κύριο dataset με τις ημερήσιες λογαριθμικές αποδόσεις των 10 κρυπτονομισμάτων (εστιάζοντας αρχικά στο BTC-USD ως αντιπροσωπευτικό δείγμα).
+The notebook demonstrates that traditional models capture **volatility clustering**, but fail at multivariate forecasting due to **mean reversion**.
 
-## Μεθοδολογία & Βήματα Υλοποίησης
-* **Έλεγχος Στασιμότητας (Stationarity):** Χρήση του στατιστικού ελέγχου Augmented Dickey-Fuller (**ADF Test**) για να επιβεβαιωθεί ότι οι λογαριθμικές αποδόσεις είναι στάσιμες.
-* **Ανάλυση Αυτοσυσχέτισης:** Οπτικοποίηση μέσω της συνάρτησης **ACF** (Autocorrelation Function) για τον εντοπισμό εξαρτήσεων της διακύμανσης στον χρόνο.
-* **Υβριδική Μοντελοποίηση:** Χρήση του **ARIMA** για τη μοντελοποίηση του μέσου (mean equation) και του **GARCH(1,1)** για τη μοντελοποίηση της υπό συνθήκη διακύμανσης (variance equation).
-* **Εξαγωγή Προβλέψεων:** Πραγματοποίηση προβλέψεων (forecasting) πάνω στο test set (το τελευταίο 20% των δεδομένων).
-* **Αξιολόγηση (Metrics):** Υπολογισμός των μετρικών σφάλματος **RMSE** (Root Mean Squared Error), **MAE** (Mean Absolute Error) και **QLIKE** (Quasi-Likelihood), προκειμένου να καταγραφεί η απόδοση του baseline απέναντι στα απότομα χρηματιστηριακά σοκ.
+### Input Data
+* `crypto_log_returns_yahoo.csv` — daily log-returns for 10 cryptocurrencies
+* The model is trained on **BTC-USD** as a representative asset
 
-## Συμπεράσματα του Σταδίου
-* Το **GARCH** αποδίδει ικανοποιητικά στην ποσοτικοποίηση του κινδύνου και εμφανίζει καλή συμπεριφορά στη μετρική QLIKE, καθώς "τιμωρεί" αυστηρά την υποεκτίμηση της μεταβλητότητας.
-* Εντούτοις, ως **μονομεταβλητό μοντέλο**, αδυνατεί να συνυπολογίσει τις αλληλεξαρτήσεις και τη μετάδοση κινδύνου (**spillovers**) από τα υπόλοιπα 9 νομίσματα. Αυτό δημιουργεί την ανάγκη για μετάβαση σε πολυμεταβλητά δίκτυα, τα οποία εξετάζονται στα επόμενα notebooks.
+### Methodology & Implementation Steps
+* **Stationarity Test:** Augmented Dickey-Fuller (**ADF Test**) to confirm log-return stationarity.
+* **Autocorrelation Analysis:** Visualization via **ACF** (Autocorrelation Function).
+* **Hybrid Modeling:** **ARIMA** for the mean equation and **GARCH(1,1)** for the conditional variance. Both Constant Mean and AR(1) mean specifications are tested.
+* **Train/Test Split:** Chronological **80% / 20%** split.
+* **Forecasting:** Predictions on the held-out test set.
+* **Metrics:** **RMSE**, **MAE**, and **QLIKE** (Quasi-Likelihood).
 
-## Απαιτούμενες Βιβλιοθήκες (Dependencies)
-Για την ορθή εκτέλεση του κώδικα, απαιτούνται τα παρακάτω Python packages:
+### Stage Conclusions
+* **GARCH** performs well at risk quantification and shows strong QLIKE behavior.
+* As a **univariate model**, it cannot account for spillovers from the other 9 coins — motivating the multivariate networks in later notebooks.
 
-* `pandas`, `numpy` (Διαχείριση δεδομένων)
-* `matplotlib` (Οπτικοποιήσεις)
-* `statsmodels` (Στατιστικά τεστ ADF, ARIMA, ACF)
-* `arch` (Υλοποίηση του μοντέλου GARCH)
-* `scikit-learn` (Υπολογισμός μετρικών σφάλματος MSE, MAE)
+### Dependencies
+* `pandas`, `numpy` — Data management
+* `matplotlib` — Visualizations
+* `statsmodels` — ADF, ARIMA, ACF
+* `arch` — GARCH(1,1)
+* `scikit-learn` — RMSE, MAE
 
-**Εγκατάσταση:**
+**Installation:**
 ```bash
 pip install arch statsmodels scikit-learn pandas numpy matplotlib
+```

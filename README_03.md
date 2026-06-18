@@ -1,36 +1,45 @@
-# 03_Deep_Learning_Baselines.ipynb
+---
 
-## Περιγραφή
-Αυτό το Jupyter Notebook αντιστοιχεί στον **Μήνα 3** της έρευνας και επικεντρώνεται στην υλοποίηση και αξιολόγηση μοντέλων Βαθιάς Μάθησης (Deep Learning) ως εναλλακτικά baselines. Το κύριο χαρακτηριστικό αυτού του σταδίου είναι η μετάβαση από τη στατιστική μοντελοποίηση στη χρήση αναδρομικών και συνελικτικών αρχιτεκτονικών, οι οποίες μπορούν να συλλάβουν μη-γραμμικές εξαρτήσεις στις χρονοσειρές των κρυπτονομισμάτων.
+## English
 
-## Δεδομένα Εισόδου (Input Data)
-Το notebook χρησιμοποιεί τα αρχεία CSV που παρήχθησαν κατά το πρώτο στάδιο (Μήνας 1), εστιάζοντας στη σύγκριση των διαφορετικών πηγών:
-* `crypto_log_returns_yahoo.csv` (Κύριο σύνολο εκπαίδευσης)
-* `crypto_log_returns_binance.csv` & `crypto_log_returns_coinbase.csv` (Για την επαλήθευση των συσχετίσεων)
+### Description
+This Jupyter Notebook corresponds to **Month 3** of the research and implements deep learning models as alternative baselines. The stage moves from statistical modeling to recurrent, convolutional, and attention-based architectures.
 
-## Μεθοδολογία & Προετοιμασία (Data Engineering)
-* **Κλιμάκωση (Scaling):** Χρήση του `MinMaxScaler` για την κανονικοποίηση των δεδομένων στο διάστημα `[0, 1]`, ένα απαραίτητο βήμα για την ομαλή σύγκλιση των νευρωνικών δικτύων κατά την εκπαίδευση.
-* **Κυλιόμενα Παράθυρα (Sliding Windows):** Μετατροπή των χρονοσειρών σε πρόβλημα εποπτευόμενης μάθησης (supervised learning) μέσω της δημιουργίας ακολουθιών (sequences). Συγκεκριμένα, χρησιμοποιείται ένα παράθυρο 14 ημερών για την πρόβλεψη της μεταβλητότητας της επόμενης ημέρας.
-* **Δημιουργία DataLoaders:** Χρήση των `TensorDataset` και `DataLoader` της βιβλιοθήκης PyTorch για την αποτελεσματική διαχείριση των batches κατά τη διάρκεια της εκπαίδευσης.
+**Note:** This is **univariate** forecasting — **BTC-USD** volatility (absolute log-returns) is predicted from 14-day historical windows.
 
-## Αρχιτεκτονικές Μοντέλων (Baselines)
-Στο notebook υλοποιούνται και συγκρίνονται οι εξής αρχιτεκτονικές νευρωνικών δικτύων:
-* **LSTM (Long Short-Term Memory):** Εξειδικευμένα δίκτυα για τη διαχείριση προβλημάτων μακροχρόνιας μνήμης και την αποφυγή του προβλήματος της εξαφάνισης κλίσης (vanishing gradient).
-* **GRU (Gated Recurrent Unit):** Χρησιμοποιείται ως μια πιο ελαφριά, απλοποιημένη και ταχεία εναλλακτική της αρχιτεκτονικής LSTM.
-* **TCN (Temporal Convolutional Networks) / Transformers:** Αξιοποίηση μηχανισμών προσοχής (attention mechanisms) ή συνελίξεων πάνω στη χρονική διάσταση για την εξαγωγή μοτίβων (ανάλογα με την τελική πειραματική υλοποίηση).
+### Input Data
+* `crypto_log_returns_yahoo.csv` — main training set
+* `crypto_log_returns_binance.csv` & `crypto_log_returns_coinbase.csv` — generalization checks (Frozen Inference)
 
-## Αξιολόγηση & Σύγκριση Πηγών
-* **Pearson Correlation Matrix:** Πραγματοποιείται έλεγχος συσχέτισης μεταξύ των τριών πηγών δεδομένων (Yahoo, Binance, Coinbase) για να επιβεβαιωθεί η δομική ακεραιότητα των δεδομένων πριν την εκπαίδευση.
-* **Σφάλματα Πρόβλεψης:** Γίνεται συστηματική καταγραφή των μετρικών **RMSE** (Root Mean Squared Error) και **MAE** (Mean Absolute Error) για την αξιολόγηση κάθε μοντέλου.
+### Methodology & Data Preparation
+* **Scaling:** `MinMaxScaler` to `[0, 1]`.
+* **Sliding Windows:** **14-day** window → next-day prediction.
+* **Train/Test Split:** Chronological **80% / 20%** split.
+* **DataLoaders:** PyTorch `TensorDataset` and `DataLoader` with batch size 32.
+* **Early Stopping:** Patience of 15 epochs to prevent overfitting.
 
-## Απαιτούμενες Βιβλιοθήκες (Dependencies)
-Για την εκτέλεση του κώδικα και την αναπαραγωγή των πειραμάτων απαιτούνται:
+### Model Architectures
+Four architectures are implemented and compared:
 
-* `torch` & `torch.nn` (Πλαίσιο Βαθιάς Μάθησης)
-* `numpy`, `pandas` (Επεξεργασία και διαχείριση δεδομένων)
-* `scikit-learn` (`MinMaxScaler`, υπολογισμός μετρικών)
-* `matplotlib` (Οπτικοποίηση διαγραμμάτων εκπαίδευσης / loss curves)
+| Model | Description |
+|---|---|
+| **LSTM** | 2-layer LSTM with 0.2 dropout |
+| **GRU** | 2-layer GRU — lighter alternative |
+| **TCN** | Temporal Convolutional Network with dilated convolutions |
+| **Transformer** | Time-series Transformer with positional encoding |
 
-**Εγκατάσταση:**
+### Evaluation
+* **Metrics:** **RMSE**, **MAE**, and **QLIKE** — compared against GARCH(1,1) from Notebook 02.
+* **Pearson Correlation:** BTC-USD correlation check across Yahoo, Binance, and Coinbase.
+* **Robustness (Frozen Inference):** Trained weights evaluated without retraining on Binance and Coinbase.
+
+### Dependencies
+* `torch` — Deep learning framework
+* `numpy`, `pandas` — Data processing
+* `scikit-learn` — `MinMaxScaler`, metrics
+* `matplotlib` — Learning curves
+
+**Installation:**
 ```bash
 pip install torch scikit-learn pandas numpy matplotlib
+```

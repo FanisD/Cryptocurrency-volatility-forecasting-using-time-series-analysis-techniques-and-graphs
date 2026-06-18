@@ -1,35 +1,39 @@
-# 04_Static_Graph_Construction_GNNs.ipynb
+---
 
-## Περιγραφή
-Αυτό το Jupyter Notebook (**Μήνας 4**) αποτελεί τον πυρήνα της καινοτομίας της παρούσας πτυχιακής εργασίας. Σηματοδοτεί τη μετάβαση από τα μονομεταβλητά μοντέλα (univariate baselines) στα **Χωροχρονικά Νευρωνικά Δίκτυα Γράφων (Spatio-Temporal GNNs)**.
+## English
 
-Ο κύριος σκοπός αυτού του σταδίου είναι η μαθηματική μοντελοποίηση της αγοράς των κρυπτονομισμάτων ως ένα πολύπλοκο δίκτυο (γράφημα), όπου τα νομίσματα αποτελούν τους κόμβους (**nodes**) και οι συσχετίσεις τους τις ακμές (**edges**). Στη συνέχεια, τα δεδομένα αυτά τροφοδοτούν τις πρώτες αρχιτεκτονικές GNN για την πολυμεταβλητή πρόβλεψη της μεταβλητότητας.
+### Description
+This Jupyter Notebook (**Month 4**) is the core innovation of the thesis. It marks the transition from univariate baselines to **Spatio-Temporal Graph Neural Networks (ST-GNNs)**.
 
-## Δημιουργία Στατικών Γράφων (Graph Construction)
-Για την αναπαράσταση της συνδεσιμότητας της αγοράς, κατασκευάζονται και οπτικοποιούνται (μέσω της βιβλιοθήκης `networkx`) δύο θεμελιώδεις στατικοί γράφοι:
+The cryptocurrency market is modeled as a network (graph): coins are **nodes** and correlations are **edges**. Forecasting is **multivariate** across all 10 coins simultaneously.
 
-* **Graph A (Correlation Graph):** Ένας μη-κατευθυνόμενος γράφος (undirected) όπου τα βάρη των ακμών προκύπτουν από τον συντελεστή συσχέτισης **Pearson** των αποδόσεων μεταξύ των νομισμάτων.
-* **Graph B (Volatility Spillover Graph):** Ένας κατευθυνόμενος γράφος (directed weighted graph) που υπολογίζεται μέσω Διανυσματικής Αυτοπαλινδρόμησης (**VAR**), βασισμένος στη θεωρία των Diebold & Yılmaz (2014) για τη μετάδοση του κινδύνου.
+### Static Graph Construction
+Two static graphs are built and visualized (via `networkx`):
 
-## Αρχιτεκτονικές & Πειράματα (GNN Baselines)
-Αφού εξαχθεί ο κανονικοποιημένος πίνακας γειτνίασης (Adjacency Matrix), υλοποιούνται και εκπαιδεύονται οι εξής υβριδικές χωροχρονικές αρχιτεκτονικές:
+* **Graph A (Correlation Graph):** Undirected graph with **Pearson correlation** edge weights (~84 edges).
+* **Graph B (Volatility Spillover Graph):** Directed graph via **VAR(1)** (Diebold & Yılmaz, 2014) (~24 edges).
 
-* **GCN + LSTM:** Χρήση Συνελικτικών Δικτύων Γράφων (**Graph Convolutional Networks**) για την εξαγωγή χωρικών χαρακτηριστικών, σε συνδυασμό με ένα επίπεδο **LSTM** για τη χρονική ακολουθία.
-* **GAT + GRU:** Χρήση Δικτύων Προσοχής (**Graph Attention Networks**), τα οποία δίνουν δυναμικά διαφορετικά βάρη στους "γείτονες" κόμβους, συνδυασμένα με ένα επίπεδο **GRU**.
+### Architectures & Experiments
+After constructing the normalized adjacency matrix, two hybrid spatio-temporal architectures are trained:
 
-## Αξιολόγηση και Ευρήματα
-* Τα μοντέλα εκπαιδεύονται στο κύριο dataset (**Yahoo Finance**).
-* Καταγράφονται οι μετρικές αξιολόγησης **RMSE** και **QLIKE**.
-* **Key Finding:** Εντοπίζεται το φαινόμενο της **υπερ-εξομάλυνσης (oversmoothing)**, όπου η χρήση ενός αυστηρά προκαθορισμένου, στατικού γράφου "αναγκάζει" τα νομίσματα να μοιράζονται υπερβολικά πολλές πληροφορίες. Αυτό μειώνει την ακρίβεια της πρόβλεψης σε ατομικό επίπεδο και ανοίγει τον δρόμο για την ανάγκη χρήσης Δυναμικών Γράφων στο επόμενο στάδιο (Μήνας 5).
+* **GCN + LSTM (T-GCN):** Graph Convolutional Networks for spatial features + **LSTM** for temporal dynamics.
+* **GAT + GRU:** Graph Attention Networks with dynamic neighbor weights + **GRU**.
 
-## Απαιτούμενες Βιβλιοθήκες (Dependencies)
-Για την εκτέλεση του κώδικα και των γραφημάτων απαιτούνται:
+**Target:** Absolute log-returns (realized volatility proxy) for all 10 coins, with a **14-day** sliding window and **80% / 20%** train/test split.
 
-* `torch` & `torch_geometric` (Υλοποίηση των GCN/GAT layers)
-* `networkx` (Δημιουργία και οπτικοποίηση των γράφων)
-* `statsmodels` (Υπολογισμός του VAR Spillover matrix)
-* `pandas`, `numpy`, `matplotlib` (Διαχείριση δεδομένων και οπτικοποίηση)
+### Evaluation & Findings
+* Training on the main dataset (**Yahoo Finance**).
+* Metrics: **RMSE**, **MAE**, and **QLIKE** (evaluated primarily on the BTC-USD node).
+* **Frozen Inference:** Trained weights evaluated on Binance and Coinbase without retraining.
+* **Key Finding:** **Oversmoothing** — the static graph forces coins to share excessive information, reducing individual-level accuracy. This motivates the Adaptive ST-GNN in Notebook 05.
 
-**Εγκατάσταση:**
+### Dependencies
+* `torch` & `torch_geometric` — GCN/GAT layers
+* `networkx` — Graph construction and visualization
+* `statsmodels` — VAR spillover matrix
+* `pandas`, `numpy`, `matplotlib`, `scikit-learn` — Data and visualization
+
+**Installation:**
 ```bash
-pip install torch_geometric networkx statsmodels
+pip install torch torch_geometric networkx statsmodels scikit-learn pandas numpy matplotlib
+```
